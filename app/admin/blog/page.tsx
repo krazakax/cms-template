@@ -1,13 +1,16 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdminSession } from "@/lib/auth/session";
+import { getCurrentProject } from "@/lib/auth/project";
 
 export default async function BlogAdminPage() {
-  await requireAdminSession();
+  const session = await requireAdminSession();
+  const project = getCurrentProject(session.memberships);
   const supabase = await createClient();
   const { data: posts } = await supabase
     .from("posts")
     .select("id,title,slug,status,updated_at,published_at")
+    .eq("project_id", project?.project_id)
     .order("updated_at", { ascending: false });
 
   return (

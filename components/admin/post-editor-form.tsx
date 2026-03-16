@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 
 type PostValues = {
   id?: string;
+  project_id: string;
   title: string;
   slug: string;
   excerpt: string | null;
@@ -17,7 +18,6 @@ type PostValues = {
   author_name: string | null;
   status: "draft" | "published";
   published_at: string | null;
-  project_id?: string | null;
 };
 
 export function PostEditorForm({ actorId, initialValues, mediaOptions }: { actorId: string; initialValues: PostValues; mediaOptions: { id: string; file_url: string; alt_text: string | null }[] }) {

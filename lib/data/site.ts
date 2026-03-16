@@ -17,21 +17,22 @@ function getDefaultSettings() {
   };
 }
 
-export async function getSiteSettings() {
+export async function getSiteSettings(projectId: string | null | undefined) {
+  if (!projectId) return getDefaultSettings();
+
   const supabase = await createClient();
   const { data } = await supabase
     .from("site_settings")
     .select("site_title,logo_url,footer_content,nav_menu")
+    .eq("project_id", projectId)
     .order("updated_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  const defaults = getDefaultSettings();
-
   return {
-    site_title: data?.site_title ?? defaults.site_title,
-    logo_url: data?.logo_url ?? defaults.logo_url,
-    footer_content: data?.footer_content ?? defaults.footer_content,
-    nav_menu: (data?.nav_menu as NavItem[] | null) ?? defaults.nav_menu,
+    site_title: data?.site_title ?? getDefaultSettings().site_title,
+    logo_url: data?.logo_url ?? getDefaultSettings().logo_url,
+    footer_content: data?.footer_content ?? getDefaultSettings().footer_content,
+    nav_menu: (data?.nav_menu as NavItem[] | null) ?? getDefaultSettings().nav_menu,
   };
 }

@@ -25,6 +25,7 @@ const pageSchema = z.object({
 
 const postSchema = z.object({
   id: z.string().optional(),
+  project_id: z.string(),
   title: z.string().min(2),
   slug: z.string().min(1),
   excerpt: z.string().nullable(),
@@ -33,24 +34,21 @@ const postSchema = z.object({
   author_name: z.string().nullable(),
   status: z.enum(["draft", "published"]),
   published_at: z.string().nullable(),
-  project_id: z.string().nullable().optional(),
 });
 
-const navItemSchema = z.object({ label: z.string().min(1), href: z.string().min(1) });
+const navItemSchema = z.object({
+  label: z.string().min(1),
+  href: z.string().min(1),
+});
 
 const siteSettingsSchema = z.object({
   id: z.string().optional(),
+  project_id: z.string(),
   site_title: z.string(),
   logo_url: z.string().nullable(),
   footer_content: z.string().nullable(),
   nav_menu: z.array(navItemSchema),
-  project_id: z.string().nullable().optional(),
 });
-
-async function logIfProject(projectId: string | null | undefined, actorId: string, entityType: string, entityId: string, action: string, payload?: Record<string, unknown>) {
-  if (!projectId) return;
-  await logActivity(projectId, actorId, entityType, entityId, action, payload);
-}
 
 export async function savePage(input: unknown, actorId: string) {
   const data = pageSchema.parse(input);
@@ -60,20 +58,20 @@ export async function savePage(input: unknown, actorId: string) {
     slug: slugify(data.slug || data.title),
     published_at: data.status === "published" ? data.published_at ?? new Date().toISOString() : null,
   };
-
-  const { error } = await supabase.from("pages").update(payload).eq("id", data.id);
+  const { error } = await supabase.from("pages").update(payload).eq("id", data.id).eq("project_id", data.project_id);
   if (error) return { error: error.message };
-  await logIfProject(data.project_id, actorId, "pages", data.id, "updated", { title: data.title });
+  await logIfProject(parsed.project_id, actorId, "site_settings", data.id, parsed.id ? "updated" : "created");
   return { success: true };
 }
 
-export async function createPage(input: { title: string; slug: string; template_key: string }, _actorId: string) {
+export async function createPage(input: { project_id: string; title: string; slug: string; template_key: string }, actorId: string) {
   const supabase = await createClient();
   const slug = slugify(input.slug || input.title);
 
   const { data: existingDefinition } = await supabase
     .from("template_definitions")
     .select("id")
+    .eq("project_id", input.project_id)
     .eq("template_key", input.template_key)
     .maybeSingle();
 
@@ -82,7 +80,7 @@ export async function createPage(input: { title: string; slug: string; template_
     : (
         await supabase
           .from("template_definitions")
-          .insert({ template_key: input.template_key, schema_json: getTemplateSchema(input.template_key) })
+          .insert({ project_id: input.project_id, template_key: input.template_key, schema_json: getTemplateSchema(input.template_key) })
           .select("id")
           .single()
       ).data?.id;
@@ -92,18 +90,19 @@ export async function createPage(input: { title: string; slug: string; template_
   const { data, error } = await supabase
     .from("pages")
     .insert({
+      project_id: input.project_id,
       template_definition_id: templateDefinitionId,
       title: input.title,
       slug,
       status: "draft",
       page_content: {},
       noindex: false,
-      project_id: null,
     })
     .select("id")
     .single();
 
   if (error) return { error: error.message };
+  await logActivity(input.project_id, actorId, "pages", data.id, "created", { title: input.title });
   return { success: true, id: data.id };
 }
 
@@ -116,23 +115,23 @@ export async function savePost(input: unknown, actorId: string) {
     published_at: data.status === "published" ? data.published_at ?? new Date().toISOString() : null,
   };
 
-  const query = data.id ? supabase.from("posts").update(payload).eq("id", data.id) : supabase.from("posts").insert({ ...payload, project_id: payload.project_id ?? null });
+  const query = data.id ? supabase.from("posts").update(payload).eq("id", data.id) : supabase.from("posts").insert(payload);
   const { error, data: result } = await query.select("id").single();
   if (error) return { error: error.message };
-  await logIfProject(data.project_id, actorId, "posts", result.id, data.id ? "updated" : "created", { title: data.title });
+  await logActivity(data.project_id, actorId, "posts", result.id, data.id ? "updated" : "created", { title: data.title });
   return { success: true, id: result.id };
 }
 
 export async function saveSiteSettings(
-  input: { id?: string; site_title: string; logo_url: string | null; footer_content: string | null; nav_menu: unknown; project_id?: string | null },
+  input: { id?: string; project_id: string; site_title: string; logo_url: string | null; footer_content: string | null; nav_menu: unknown },
   actorId: string,
 ) {
   const parsed = siteSettingsSchema.parse(input);
   const supabase = await createClient();
-  const query = parsed.id ? supabase.from("site_settings").update(parsed).eq("id", parsed.id) : supabase.from("site_settings").insert({ ...parsed, project_id: parsed.project_id ?? null });
+  const query = parsed.id ? supabase.from("site_settings").update(parsed).eq("id", parsed.id) : supabase.from("site_settings").insert(parsed);
   const { error, data } = await query.select("id").single();
   if (error) return { error: error.message };
-  await logIfProject(parsed.project_id, actorId, "site_settings", data.id, parsed.id ? "updated" : "created");
+  await logActivity(parsed.project_id, actorId, "site_settings", data.id, parsed.id ? "updated" : "created");
   return { success: true };
 }
 

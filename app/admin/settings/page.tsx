@@ -7,10 +7,13 @@ export default async function SettingsPage() {
   const supabase = await createClient();
   const { data: settings } = await supabase
     .from("site_settings")
-    .select("id,site_title,logo_url,footer_content,nav_menu")
+    .select("id,project_id,site_title,logo_url,footer_content,nav_menu")
+    .eq("project_id", projectMembership?.project_id)
     .order("updated_at", { ascending: false })
     .limit(1)
     .maybeSingle();
+
+  if (!projectMembership) return null;
 
   return (
     <div className="space-y-4">
@@ -19,6 +22,7 @@ export default async function SettingsPage() {
         actorId={session.user.id}
         initialValues={{
           id: settings?.id,
+          project_id: projectMembership.project_id,
           site_title: settings?.site_title ?? "",
           logo_url: settings?.logo_url,
           footer_content: settings?.footer_content,

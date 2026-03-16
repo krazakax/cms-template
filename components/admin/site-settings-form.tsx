@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 
 type SettingsValues = {
   id?: string;
+  project_id: string;
   site_title: string;
   logo_url: string | null;
   footer_content: string | null;

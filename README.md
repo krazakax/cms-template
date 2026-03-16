@@ -30,6 +30,7 @@ Use `.env.local` from `.env.example`.
 - `SUPABASE_SERVICE_ROLE_KEY` (server only, only where strictly necessary)
 - `NEXT_PUBLIC_SITE_URL` (public URL for canonical metadata)
 - `OPENAI_API_KEY` (optional/future AI features)
+- `NEXT_PUBLIC_SITE_PROJECT_ID` (public project ID used for public site settings lookup)
 
 ## Local setup
 1. Install deps: `npm install`
@@ -84,6 +85,4 @@ Also note: if you add project switching persistence, media usage tracking, or te
 
 
 ## New required migration for this MVP
-Run migrations in order:
-1. `supabase/migrations/20260316131000_cms_mvp.sql`
-2. `supabase/migrations/20260316143000_single_tenant_remove_required_projects.sql` (for single-tenant deployments)
+Run `supabase/migrations/20260316131000_cms_mvp.sql` before using blog and site settings.

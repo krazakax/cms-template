@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export function NewPageForm({
+  projectId,
   actorId,
   templateOptions,
 }: {
+  projectId: string;
   actorId: string;
   templateOptions: { key: string; label: string }[];
 }) {
@@ -26,7 +28,7 @@ export function NewPageForm({
       onSubmit={(e) => {
         e.preventDefault();
         startTransition(async () => {
-          const result = await createPage({ title, slug, template_key: template }, actorId);
+          const result = await createPage({ project_id: projectId, title, slug, template_key: template }, actorId);
           if (result.error) {
             setMessage(result.error);
             return;

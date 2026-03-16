@@ -6,10 +6,12 @@ import { createClient } from "@/lib/supabase/server";
 
 export default async function PageEditor({ params }: { params: { id: string } }) {
   const session = await requireAdminSession();
+  const project = getCurrentProject(session.memberships);
+  if (!project) notFound();
   const supabase = await createClient();
   const [{ data }, { data: media }] = await Promise.all([
-    getPageById(undefined, params.id),
-    supabase.from("media_assets").select("id,file_url,alt_text").order("created_at", { ascending: false }),
+    getPageById(project.project_id, params.id),
+    supabase.from("media_assets").select("id,file_url,alt_text").eq("project_id", project.project_id).order("created_at", { ascending: false }),
   ]);
   if (!data) notFound();
 
