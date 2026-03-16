@@ -32,6 +32,6 @@ export async function getSessionContext() {
 
 export async function requireAdminSession() {
   const session = await getSessionContext();
-  if (!session) redirect("/auth/login");
+  if (!session) redirect("/login");
   return session;
 }
