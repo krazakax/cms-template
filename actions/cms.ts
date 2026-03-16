@@ -50,6 +50,37 @@ const siteSettingsSchema = z.object({
   nav_menu: z.array(navItemSchema),
 });
 
+
+export async function savePageField(
+  pageId: string,
+  projectId: string,
+  field: string,
+  value: string,
+  actorId: string,
+) {
+  const supabase = await createClient();
+  const { data: page } = await supabase
+    .from("pages")
+    .select("page_content")
+    .eq("id", pageId)
+    .eq("project_id", projectId)
+    .single();
+
+  if (!page) return { error: "Page not found" };
+
+  const updated = { ...(page.page_content as Record<string, unknown>), [field]: value };
+  const { error } = await supabase
+    .from("pages")
+    .update({ page_content: updated })
+    .eq("id", pageId)
+    .eq("project_id", projectId);
+
+  if (error) return { error: error.message };
+
+  await logActivity(projectId, actorId, "pages", pageId, "inline_edit", { field });
+  return { success: true };
+}
+
 export async function savePage(input: unknown, actorId: string) {
   const data = pageSchema.parse(input);
   const supabase = await createClient();

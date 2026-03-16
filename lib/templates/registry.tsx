@@ -4,7 +4,13 @@ import { FAQTemplateV1 } from "@/components/site/templates/faq-template-v1";
 import { HomeTemplateV1 } from "@/components/site/templates/home-template-v1";
 import { LandingTemplateV1 } from "@/components/site/templates/landing-template-v1";
 
-const map: Record<string, (props: { content: Record<string, unknown> }) => JSX.Element> = {
+type TemplateProps = {
+  content: Record<string, unknown>;
+  pageId?: string;
+  projectId?: string;
+};
+
+const map: Record<string, (props: TemplateProps) => JSX.Element> = {
   home_v1: HomeTemplateV1,
   about_v1: AboutTemplateV1,
   contact_v1: ContactTemplateV1,
@@ -12,7 +18,7 @@ const map: Record<string, (props: { content: Record<string, unknown> }) => JSX.E
   landing_v1: LandingTemplateV1,
 };
 
-export function renderTemplate(templateKey: string, content: Record<string, unknown>) {
+export function renderTemplate(templateKey: string, content: Record<string, unknown>, pageId?: string, projectId?: string) {
   const Component = map[templateKey] ?? HomeTemplateV1;
-  return <Component content={content} />;
+  return <Component content={content} pageId={pageId} projectId={projectId} />;
 }
