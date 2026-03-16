@@ -16,7 +16,10 @@ export default async function AdminPages() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Pages</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Pages</h1>
+        <Link href="/admin/pages/new" className="rounded bg-primary px-3 py-1 text-sm text-primary-foreground">New page</Link>
+      </div>
       <Input placeholder="Search by title or slug" />
       <table className="w-full text-sm">
         <thead><tr className="border-b text-left"><th>Title</th><th>Slug</th><th>Template</th><th>Status</th><th>Updated</th><th /></tr></thead>
