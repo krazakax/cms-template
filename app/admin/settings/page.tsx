@@ -1,11 +1,9 @@
 import { requireAdminSession } from "@/lib/auth/session";
-import { getCurrentProject } from "@/lib/auth/project";
 import { createClient } from "@/lib/supabase/server";
 import { SiteSettingsForm } from "@/components/admin/site-settings-form";
 
 export default async function SettingsPage() {
   const session = await requireAdminSession();
-  const projectMembership = getCurrentProject(session.memberships);
   const supabase = await createClient();
   const { data: settings } = await supabase
     .from("site_settings")

@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { PageEditorForm } from "@/components/admin/page-editor-form";
 import { requireAdminSession } from "@/lib/auth/session";
-import { getCurrentProject } from "@/lib/auth/project";
 import { getPageById } from "@/lib/data/cms";
 import { createClient } from "@/lib/supabase/server";
 
@@ -25,7 +24,6 @@ export default async function PageEditor({ params }: { params: { id: string } })
         mediaOptions={media ?? []}
         initialValues={{
           id: data.id,
-          project_id: data.project_id,
           title: data.title,
           slug: data.slug,
           status: data.status,

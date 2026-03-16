@@ -1,11 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 
-export async function getDashboardData(projectId: string) {
+export async function getDashboardData(projectId?: string) {
   const supabase = await createClient();
+  const pagesQuery = supabase.from("pages").select("id,status");
+  const activityQuery = supabase.from("activity_logs").select("id,action,entity_type,created_at").order("created_at", { ascending: false }).limit(10);
+  const featuresQuery = supabase.from("feature_ledger").select("id,status");
+
   const [pages, activity, features] = await Promise.all([
-    supabase.from("pages").select("id,status").eq("project_id", projectId),
-    supabase.from("activity_logs").select("id,action,entity_type,created_at").eq("project_id", projectId).order("created_at", { ascending: false }).limit(10),
-    supabase.from("feature_ledger").select("id,status").eq("project_id", projectId),
+    projectId ? pagesQuery.eq("project_id", projectId) : pagesQuery,
+    projectId ? activityQuery.eq("project_id", projectId) : activityQuery,
+    projectId ? featuresQuery.eq("project_id", projectId) : featuresQuery,
   ]);
 
   const totalPages = pages.data?.length ?? 0;
@@ -15,12 +19,14 @@ export async function getDashboardData(projectId: string) {
   return { totalPages, draftPages, publishedPages, recentActivity: activity.data ?? [], features: features.data ?? [] };
 }
 
-export async function getPageBySlug(projectId: string, slug: string) {
+export async function getPageBySlug(projectId: string | undefined, slug: string) {
   const supabase = await createClient();
-  return supabase.from("pages").select("*, template_definitions(*)").eq("project_id", projectId).eq("slug", slug).single();
+  const query = supabase.from("pages").select("*, template_definitions(*)").eq("slug", slug);
+  return projectId ? query.eq("project_id", projectId).single() : query.single();
 }
 
-export async function getPageById(projectId: string, id: string) {
+export async function getPageById(projectId: string | undefined, id: string) {
   const supabase = await createClient();
-  return supabase.from("pages").select("*, template_definitions(*)").eq("project_id", projectId).eq("id", id).single();
+  const query = supabase.from("pages").select("*, template_definitions(*)").eq("id", id);
+  return projectId ? query.eq("project_id", projectId).single() : query.single();
 }

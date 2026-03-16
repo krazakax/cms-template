@@ -8,7 +8,6 @@ import { getTemplateSchema } from "@/lib/templates/predefined";
 
 const pageSchema = z.object({
   id: z.string(),
-  project_id: z.string(),
   title: z.string().min(2),
   slug: z.string().min(1),
   status: z.enum(["draft", "published"]),
@@ -21,6 +20,7 @@ const pageSchema = z.object({
   canonical_url: z.string().nullable(),
   noindex: z.boolean(),
   published_at: z.string().nullable(),
+  project_id: z.string().nullable().optional(),
 });
 
 const postSchema = z.object({
@@ -60,7 +60,7 @@ export async function savePage(input: unknown, actorId: string) {
   };
   const { error } = await supabase.from("pages").update(payload).eq("id", data.id).eq("project_id", data.project_id);
   if (error) return { error: error.message };
-  await logActivity(data.project_id, actorId, "pages", data.id, "updated", { title: data.title });
+  await logIfProject(parsed.project_id, actorId, "site_settings", data.id, parsed.id ? "updated" : "created");
   return { success: true };
 }
 

@@ -1,13 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireAdminSession } from "@/lib/auth/session";
-import { getCurrentProject } from "@/lib/auth/project";
 import { Badge } from "@/components/ui/badge";
 
 export default async function FeaturesPage() {
-  const session = await requireAdminSession();
-  const project = getCurrentProject(session.memberships);
+  await requireAdminSession();
   const supabase = await createClient();
-  const { data } = await supabase.from("feature_ledger").select("id,title,category,status,client_visible,description,notes").eq("project_id", project?.project_id);
+  const { data } = await supabase.from("feature_ledger").select("id,title,category,status,client_visible,description,notes");
 
   return (
     <div className="space-y-4">

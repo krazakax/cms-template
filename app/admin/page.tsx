@@ -2,14 +2,11 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { requireAdminSession } from "@/lib/auth/session";
-import { getCurrentProject } from "@/lib/auth/project";
 import { getDashboardData } from "@/lib/data/cms";
 
 export default async function AdminDashboard() {
-  const session = await requireAdminSession();
-  const project = getCurrentProject(session.memberships);
-  if (!project) return <p>No project membership found.</p>;
-  const data = await getDashboardData(project.project_id);
+  await requireAdminSession();
+  const data = await getDashboardData();
 
   return (
     <div className="space-y-6">
@@ -21,7 +18,7 @@ export default async function AdminDashboard() {
       </div>
       <Card>
         <h2 className="mb-2 font-semibold">Feature Ledger Summary</h2>
-        <div className="flex flex-wrap gap-2">{data.features.map((f: {id: string; status: string;}) => <Badge key={f.id}>{f.status}</Badge>)}</div>
+        <div className="flex flex-wrap gap-2">{data.features.map((f: { id: string; status: string }) => <Badge key={f.id}>{f.status}</Badge>)}</div>
       </Card>
       <Card>
         <h2 className="mb-2 font-semibold">Quick Links</h2>

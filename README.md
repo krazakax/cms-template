@@ -14,7 +14,7 @@ Production-ready structured CMS starter for agency/client use with one reusable 
 - Admin routes: `/admin`, `/admin/pages`, `/admin/pages/[id]`, `/admin/media`, `/admin/content-types`, `/admin/content/[contentTypeKey]`, `/admin/features`, `/admin/settings`, `/admin/blog`, `/admin/users`
 - Supabase SSR-safe auth client setup for App Router
 - Protected admin routing + login/logout
-- Project-aware data access (`project_id` filtered)
+- Single-tenant data access (no required project switching)
 - Structured page editor (template schema driven, no drag/drop)
 - Public template rendering (`home_v1`, `about_v1`, `contact_v1`, `landing_v1`)
 - SEO/social metadata mapping for public pages
@@ -49,11 +49,11 @@ Use `.env.local` from `.env.example`.
   - `lib/supabase/server.ts` (server)
   - `lib/supabase/middleware.ts` + root `middleware.ts`
 - `/admin` is protected by server-side session check.
-- Assumes authenticated users exist in `auth.users`, `profiles`, and `project_users`.
+- Assumes authenticated users exist in `auth.users` and `profiles` (project membership is optional in single-tenant mode).
 
-## Project scoping
-- All CMS reads/writes are project-aware with `project_id` filters.
-- Current project abstraction defaults to first membership and can be expanded to an internal-admin selector.
+## Tenant model
+- This starter assumes one client per deployment/database.
+- Project membership tables are optional in single-tenant mode.
 
 ## Templates and sections
 - Template definitions are stored in `template_definitions.schema_json`.

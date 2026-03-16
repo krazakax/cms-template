@@ -13,7 +13,7 @@ import { slugify } from "@/lib/utils";
 import { TemplateField } from "@/types";
 
 const schema = z.object({
-  id: z.string(), project_id: z.string(), title: z.string().min(2), slug: z.string().min(1), status: z.enum(["draft", "published"]),
+  id: z.string(), title: z.string().min(2), slug: z.string().min(1), status: z.enum(["draft", "published"]),
   page_content: z.record(z.any()), seo_title: z.string().nullable(), seo_description: z.string().nullable(),
   og_title: z.string().nullable(), og_description: z.string().nullable(), og_image_url: z.string().nullable(),
   canonical_url: z.string().nullable(), noindex: z.boolean(), published_at: z.string().nullable()
