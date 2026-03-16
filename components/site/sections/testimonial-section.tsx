@@ -1,0 +1,1 @@
+export function TestimonialSection({ quote, name }: { quote?: string; name?: string }) { return <section className="p-8 text-center"><blockquote className="text-xl">“{quote}”</blockquote><p className="mt-2 text-sm text-muted-foreground">— {name}</p></section>; }

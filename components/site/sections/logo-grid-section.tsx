@@ -1,0 +1,1 @@
+export function LogoGridSection({ logos = [] }: { logos?: string[] }) { return <section className="grid grid-cols-2 gap-4 p-6 md:grid-cols-5">{logos.map((logo) => <div key={logo} className="rounded border p-3 text-center text-xs">{logo}</div>)}</section>; }
