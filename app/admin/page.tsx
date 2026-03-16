@@ -25,7 +25,7 @@ export default async function AdminDashboard() {
       </Card>
       <Card>
         <h2 className="mb-2 font-semibold">Quick Links</h2>
-        <div className="flex gap-3 text-sm underline"><Link href="/admin/pages">Pages</Link><Link href="/admin/media">Media</Link><Link href="/admin/features">Features</Link></div>
+        <div className="flex gap-3 text-sm underline"><Link href="/admin/pages">Pages</Link><Link href="/admin/blog">Blog</Link><Link href="/admin/media">Media</Link><Link href="/admin/settings">Settings</Link></div>
       </Card>
     </div>
   );
