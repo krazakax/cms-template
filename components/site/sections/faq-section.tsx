@@ -1,0 +1,1 @@
+export function FAQSection({ items = [] }: { items?: Array<{ q: string; a: string }> }) { return <section className="mx-auto max-w-3xl space-y-3 p-6">{items.map((i) => <div key={i.q} className="rounded border p-3"><p className="font-medium">{i.q}</p><p className="text-sm">{i.a}</p></div>)}</section>; }
