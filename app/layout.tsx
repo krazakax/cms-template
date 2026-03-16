@@ -1,5 +1,6 @@
 import "./globals.css";
 import { ReactNode } from "react";
+import { ChunkReloadHandler } from "@/components/chunk-reload-handler";
 
 export const metadata = {
   title: "Modular CMS Starter",
@@ -9,7 +10,10 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <ChunkReloadHandler />
+        {children}
+      </body>
     </html>
   );
 }
