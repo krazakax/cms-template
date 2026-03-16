@@ -16,7 +16,7 @@ export async function getSessionContext() {
 
   const [{ data: profile }, { data: memberships, error: membershipsError }] = await Promise.all([
     supabase.from("profiles").select("id, global_role, full_name, email").eq("id", user.id).single(),
-    supabase.from("project_users").select("project_id, project_role").eq("user_id", user.id),
+    supabase.from("project_users").select("project_id, project_role, projects(id, name)").eq("user_id", user.id),
   ]);
 
   if (membershipsError) {
@@ -26,6 +26,7 @@ export async function getSessionContext() {
   const normalizedMemberships: ProjectMembership[] = (memberships ?? []).map((membership) => ({
     project_id: membership.project_id,
     project_role: membership.project_role,
+    projects: Array.isArray(membership.projects) ? membership.projects[0] : membership.projects ?? undefined,
   }));
 
   const defaultProjectId = process.env.NEXT_PUBLIC_SITE_PROJECT_ID;
@@ -33,10 +34,11 @@ export async function getSessionContext() {
     ? normalizedMemberships.some((membership) => membership.project_id === defaultProjectId)
     : true;
 
-  if (defaultProjectId && !hasDefaultMembership && normalizedMemberships.length === 0) {
+  if (defaultProjectId && !hasDefaultMembership) {
     normalizedMemberships.push({
       project_id: defaultProjectId,
       project_role: deriveDefaultProjectRole(profile?.global_role),
+      projects: undefined,
     });
   }
 
