@@ -1,14 +1,16 @@
 import { notFound } from "next/navigation";
 import { PageEditorForm } from "@/components/admin/page-editor-form";
 import { requireAdminSession } from "@/lib/auth/session";
-import { getCurrentProject } from "@/lib/auth/project";
 import { getPageById } from "@/lib/data/cms";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function PageEditor({ params }: { params: { id: string } }) {
   const session = await requireAdminSession();
-  const project = getCurrentProject(session.memberships);
-  if (!project) notFound();
-  const { data } = await getPageById(project.project_id, params.id);
+  const supabase = await createClient();
+  const [{ data }, { data: media }] = await Promise.all([
+    getPageById(undefined, params.id),
+    supabase.from("media_assets").select("id,file_url,alt_text").order("created_at", { ascending: false }),
+  ]);
   if (!data) notFound();
 
   return (
@@ -17,9 +19,9 @@ export default async function PageEditor({ params }: { params: { id: string } })
       <PageEditorForm
         actorId={session.user.id}
         fields={(data.template_definitions as { schema_json?: { fields: [] } })?.schema_json?.fields ?? []}
+        mediaOptions={media ?? []}
         initialValues={{
           id: data.id,
-          project_id: data.project_id,
           title: data.title,
           slug: data.slug,
           status: data.status,
