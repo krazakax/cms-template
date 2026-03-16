@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 import { getSiteSettings } from "@/lib/data/site";
 
 export default async function SiteLayout({ children }: { children: ReactNode }) {
-  const settings = await getSiteSettings();
+  const settings = await getSiteSettings(process.env.NEXT_PUBLIC_SITE_PROJECT_ID);
 
   return (
     <div className="min-h-screen">

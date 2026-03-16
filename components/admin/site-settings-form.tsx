@@ -15,6 +15,21 @@ type SettingsValues = {
   nav_menu: string;
 };
 
+function isValidNavMenu(input: unknown): input is { label: string; href: string }[] {
+  return (
+    Array.isArray(input) &&
+    input.every(
+      (item) =>
+        typeof item === "object" &&
+        item !== null &&
+        typeof (item as { label?: unknown }).label === "string" &&
+        (item as { label: string }).label.trim().length > 0 &&
+        typeof (item as { href?: unknown }).href === "string" &&
+        (item as { href: string }).href.trim().length > 0,
+    )
+  );
+}
+
 export function SiteSettingsForm({ actorId, initialValues }: { actorId: string; initialValues: SettingsValues }) {
   const [values, setValues] = useState(initialValues);
   const [message, setMessage] = useState<string | null>(null);
@@ -31,6 +46,10 @@ export function SiteSettingsForm({ actorId, initialValues }: { actorId: string; 
             navMenu = JSON.parse(values.nav_menu);
           } catch {
             setMessage("Nav menu must be valid JSON");
+            return;
+          }
+          if (!isValidNavMenu(navMenu)) {
+            setMessage("Nav menu must be an array of { label, href } items");
             return;
           }
           const response = await saveSiteSettings({ ...values, nav_menu: navMenu }, actorId);

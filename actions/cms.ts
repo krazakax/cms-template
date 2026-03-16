@@ -36,6 +36,20 @@ const postSchema = z.object({
   published_at: z.string().nullable(),
 });
 
+const navItemSchema = z.object({
+  label: z.string().min(1),
+  href: z.string().min(1),
+});
+
+const siteSettingsSchema = z.object({
+  id: z.string().optional(),
+  project_id: z.string(),
+  site_title: z.string(),
+  logo_url: z.string().nullable(),
+  footer_content: z.string().nullable(),
+  nav_menu: z.array(navItemSchema),
+});
+
 export async function savePage(input: unknown, actorId: string) {
   const data = pageSchema.parse(input);
   const supabase = await createClient();
@@ -112,11 +126,12 @@ export async function saveSiteSettings(
   input: { id?: string; project_id: string; site_title: string; logo_url: string | null; footer_content: string | null; nav_menu: unknown },
   actorId: string,
 ) {
+  const parsed = siteSettingsSchema.parse(input);
   const supabase = await createClient();
-  const query = input.id ? supabase.from("site_settings").update(input).eq("id", input.id) : supabase.from("site_settings").insert(input);
+  const query = parsed.id ? supabase.from("site_settings").update(parsed).eq("id", parsed.id) : supabase.from("site_settings").insert(parsed);
   const { error, data } = await query.select("id").single();
   if (error) return { error: error.message };
-  await logActivity(input.project_id, actorId, "site_settings", data.id, input.id ? "updated" : "created");
+  await logActivity(parsed.project_id, actorId, "site_settings", data.id, parsed.id ? "updated" : "created");
   return { success: true };
 }
 

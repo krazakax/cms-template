@@ -30,6 +30,7 @@ Use `.env.local` from `.env.example`.
 - `SUPABASE_SERVICE_ROLE_KEY` (server only, only where strictly necessary)
 - `NEXT_PUBLIC_SITE_URL` (public URL for canonical metadata)
 - `OPENAI_API_KEY` (optional/future AI features)
+- `NEXT_PUBLIC_SITE_PROJECT_ID` (public project ID used for public site settings lookup)
 
 ## Local setup
 1. Install deps: `npm install`
