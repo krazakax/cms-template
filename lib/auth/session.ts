@@ -33,8 +33,8 @@ export async function getSessionContext() {
     ? normalizedMemberships.some((membership) => membership.project_id === defaultProjectId)
     : true;
 
-  if (defaultProjectId && !hasDefaultMembership) {
-    normalizedMemberships.unshift({
+  if (defaultProjectId && !hasDefaultMembership && normalizedMemberships.length === 0) {
+    normalizedMemberships.push({
       project_id: defaultProjectId,
       project_role: deriveDefaultProjectRole(profile?.global_role),
     });
