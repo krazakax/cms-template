@@ -12,10 +12,21 @@ export async function getSessionContext() {
     supabase.from("project_users").select("project_id, project_role, projects(id,name)").eq("user_id", user.id),
   ]);
 
+  const normalizedMemberships: ProjectMembership[] = (memberships ?? []).map((membership) => {
+    const projectValue = membership.projects;
+    const project = Array.isArray(projectValue) ? projectValue[0] : projectValue;
+
+    return {
+      project_id: membership.project_id,
+      project_role: membership.project_role,
+      projects: project ? { id: project.id, name: project.name } : undefined,
+    };
+  });
+
   return {
     user,
     profile: profile as Profile,
-    memberships: (memberships ?? []) as ProjectMembership[],
+    memberships: normalizedMemberships,
   };
 }
 
