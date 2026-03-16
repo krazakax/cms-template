@@ -1,10 +1,24 @@
-import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { renderTemplate } from "@/lib/templates/registry";
+import Link from "next/link";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
-export default async function HomePage() {
-  const supabase = await createClient();
-  const { data: page } = await supabase.from("pages").select("*, template_definitions(template_key)").eq("slug", "home").eq("status", "published").single();
-  if (!page) notFound();
-  return renderTemplate((page.template_definitions as { template_key: string }).template_key, page.page_content || {});
+export default function HomePage() {
+  return (
+    <main className="mx-auto flex min-h-screen w-full max-w-3xl items-center justify-center p-6">
+      <Card className="w-full space-y-4 p-8">
+        <h1 className="text-3xl font-bold tracking-tight">Next.js + Supabase CMS Starter</h1>
+        <p className="text-muted-foreground">
+          This is a minimal public homepage. Sign in to access the admin dashboard.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <Button asChild>
+            <Link href="/login">Login</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/admin">Go to Admin</Link>
+          </Button>
+        </div>
+      </Card>
+    </main>
+  );
 }
