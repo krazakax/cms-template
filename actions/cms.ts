@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { logActivity } from "@/lib/activity/log";
 import { slugify } from "@/lib/utils";
@@ -84,14 +85,21 @@ export async function savePageField(
 export async function savePage(input: unknown, actorId: string) {
   const data = pageSchema.parse(input);
   const supabase = await createClient();
+  const slug = slugify(data.slug || data.title);
   const payload = {
     ...data,
-    slug: slugify(data.slug || data.title),
+    slug,
     published_at: data.status === "published" ? data.published_at ?? new Date().toISOString() : null,
   };
   const { error } = await supabase.from("pages").update(payload).eq("id", data.id).eq("project_id", data.project_id);
   if (error) return { error: error.message };
   await logActivity(data.project_id, actorId, "pages", data.id, "updated", { title: data.title });
+
+  revalidatePath("/");
+  revalidatePath(`/${slug}`);
+  revalidatePath("/admin/pages");
+  revalidatePath(`/admin/pages/${data.id}`);
+
   return { success: true };
 }
 

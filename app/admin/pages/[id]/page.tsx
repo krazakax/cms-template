@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { PageEditorForm } from "@/components/admin/page-editor-form";
 import { requireAdminSession } from "@/lib/auth/session";
 import { getCurrentProject } from "@/lib/auth/project";
-import { getPageById } from "@/lib/data/cms";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function PageEditor({ params }: { params: { id: string } }) {
@@ -11,17 +10,23 @@ export default async function PageEditor({ params }: { params: { id: string } })
   if (!project) notFound();
   const supabase = await createClient();
   const [{ data }, { data: media }] = await Promise.all([
-    getPageById(project.project_id, params.id),
+    supabase.from("pages").select("*").eq("project_id", project.project_id).eq("id", params.id).single(),
     supabase.from("media_assets").select("id,file_url,alt_text").eq("project_id", project.project_id).order("created_at", { ascending: false }),
   ]);
   if (!data) notFound();
+
+  const { data: templateDefinition } = await supabase
+    .from("template_definitions")
+    .select("schema_json")
+    .eq("id", data.template_definition_id)
+    .maybeSingle();
 
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Edit Page</h1>
       <PageEditorForm
         actorId={session.user.id}
-        fields={(data.template_definitions as { schema_json?: { fields: [] } })?.schema_json?.fields ?? []}
+        fields={(templateDefinition as { schema_json?: { fields: [] } })?.schema_json?.fields ?? []}
         mediaOptions={media ?? []}
         initialValues={{
           id: data.id,
