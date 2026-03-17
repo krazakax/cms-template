@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAdminSession } from "@/lib/auth/session";
 import { getCurrentProject } from "@/lib/auth/project";
 import { Input } from "@/components/ui/input";
+import { getTemplateKey } from "@/lib/templates/definition";
 
 export default async function AdminPages() {
   const session = await requireAdminSession();
@@ -10,7 +11,7 @@ export default async function AdminPages() {
   const supabase = await createClient();
   const { data: pages } = await supabase
     .from("pages")
-    .select("id,title,slug,status,updated_at,template_definitions(template_key)")
+    .select("id,title,slug,status,updated_at,template_definitions(template_key,key)")
     .eq("project_id", project?.project_id)
     .order("updated_at", { ascending: false });
 
@@ -25,7 +26,7 @@ export default async function AdminPages() {
         <thead><tr className="border-b text-left"><th>Title</th><th>Slug</th><th>Template</th><th>Status</th><th>Updated</th><th /></tr></thead>
         <tbody>
           {pages?.map((page) => (
-            <tr key={page.id} className="border-b"><td>{page.title}</td><td>{page.slug}</td><td>{(page.template_definitions as {template_key?: string})?.template_key}</td><td>{page.status}</td><td>{new Date(page.updated_at).toLocaleString()}</td><td><Link className="underline" href={`/admin/pages/${page.id}`}>Edit</Link></td></tr>
+            <tr key={page.id} className="border-b"><td>{page.title}</td><td>{page.slug}</td><td>{getTemplateKey(page.template_definitions as { template_key?: string; key?: string })}</td><td>{page.status}</td><td>{new Date(page.updated_at).toLocaleString()}</td><td><Link className="underline" href={`/admin/pages/${page.id}`}>Edit</Link></td></tr>
           ))}
         </tbody>
       </table>
