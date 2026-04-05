@@ -1,0 +1,37 @@
+{
+  "sites": [
+    {
+      "name": "Example contact form",
+      "url": "https://example.com/contact",
+      "waitUntil": "domcontentloaded",
+      "navigationTimeoutMs": 45000,
+      "successSelector": "[data-testid='contact-success']",
+      "successTimeoutMs": 15000,
+      "steps": [
+        {
+          "action": "fill",
+          "selector": "input[name='name']",
+          "value": "Automated Health Check"
+        },
+        {
+          "action": "fill",
+          "selector": "input[name='email']",
+          "value": "monitor@example.com"
+        },
+        {
+          "action": "fill",
+          "selector": "textarea[name='message']",
+          "value": "This is an automated form validation run."
+        },
+        {
+          "action": "check",
+          "selector": "input[name='terms']"
+        },
+        {
+          "action": "click",
+          "selector": "button[type='submit']"
+        }
+      ]
+    }
+  ]
+}
