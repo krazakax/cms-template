@@ -86,3 +86,45 @@ Also note: if you add project switching persistence, media usage tracking, or te
 
 ## New required migration for this MVP
 Run `supabase/migrations/20260316131000_cms_mvp.sql` before using blog and site settings.
+
+## Automated form monitoring (Playwright + cron + email)
+This repository now includes a scheduler that can run Playwright form submission checks on one or more sites and email you a PASS/FAIL report.
+
+### 1) Install browser dependency
+```bash
+npm install
+npx playwright install chromium
+```
+
+### 2) Configure environments
+Copy `.env.example` to `.env.local` and set:
+- `FORM_CHECK_CRON` cron expression (example: `*/30 * * * *`)
+- `FORM_CHECK_EMAIL_FROM` sender email
+- `FORM_CHECK_EMAIL_TO` recipient email(s), comma-separated
+- SMTP settings using either:
+  - `FORM_CHECK_SMTP_URL`, or
+  - `FORM_CHECK_SMTP_HOST`, `FORM_CHECK_SMTP_PORT`, `FORM_CHECK_SMTP_USER`, `FORM_CHECK_SMTP_PASS`
+
+### 3) Configure sites + form steps
+Copy the template and customize selectors:
+```bash
+cp scripts/form-sites.example.json scripts/form-sites.json
+```
+
+For each site entry:
+- `url`: page containing the form
+- `steps`: ordered interactions (`fill`, `click`, `check`, `waitForSelector`)
+- `successSelector`: selector that confirms a successful submit
+
+### 4) Run locally
+- Run continuously on cron:
+  ```bash
+  npm run form:monitor
+  ```
+- Run immediately (and continue scheduled checks):
+  ```bash
+  npm run form:check-once
+  ```
+
+### 5) Run in production as a cron worker
+Run `npm run form:monitor` in any long-running worker/container/process manager where the env vars are configured.
